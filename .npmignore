@@ -4,3 +4,6 @@ test
 node-notifier_flow.png
 .oxlintrc.json
 .travis.yml
+.github/
+.husky/
+.release-please-manifest.json

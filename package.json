@@ -14,7 +14,7 @@
     "example:windows:custom-path": "cross-env DEBUG=notifier node ./example/toaster-custom-path.js",
     "copy-resources": "copyfiles -u 2 ./vendor/snoreToast/snoretoast-x64.exe ./dist/example/resources/ && copyfiles -u 1 ./example/coulson.jpg ./dist/example/resources/",
     "preexample:windows:nexe-custom-path": "rimraf dist",
-    "example:windows:nexe-custom-path": "nexe -t windows-x64-14.15.3 -i ./example/toaster-custom-path.js -o ./dist/toaster-custom-path.exe && npm run copy-resources",
+    "example:windows:nexe-custom-path": "pkg -t node22-win-x64 ./example/toaster-custom-path.js -o ./dist/toaster-custom-path.exe && npm run copy-resources",
     "postexample:windows:nexe-custom-path": "cross-env DEBUG=notifier ./dist/toaster-custom-path.exe",
     "lint": "oxlint example lib notifiers test index.js",
     "prepare": "husky install"
@@ -44,12 +44,12 @@
   "author": "Original: Mikael Brevik (https://github.com/mikaelbr/node-notifier). V2 author: Oleksandr Hladin <alexgladin17@gmail.com> (https://github.com/AlexHladin/node-notifier)",
   "license": "MIT",
   "devDependencies": {
+    "@yao-pkg/pkg": "^6.23.0",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "husky": "^8.0.1",
-    "jest": "^26.6.3",
-    "lint-staged": "^13.0.3",
-    "nexe": "^4.0.0-beta.19",
+    "jest": "^30.5.2",
+    "lint-staged": "^16.4.0",
     "oxlint": "^1.86.0",
     "prettier": "^2.3.0",
     "rimraf": "^3.0.2"
@@ -68,9 +68,9 @@
     ]
   },
   "bugs": {
-    "url": "https://github.com/mikaelbr/node-notifier/issues"
+    "url": "https://github.com/AlexHladin/issues"
   },
-  "homepage": "https://github.com/mikaelbr/node-notifier#readme",
+  "homepage": "https://github.com/AlexHladin#readme",
   "directories": {
     "example": "example",
     "test": "test"
