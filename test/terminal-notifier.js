@@ -10,6 +10,7 @@ let notifier = null;
 const originalUtils = utils.fileCommandJson;
 const originalMacVersion = utils.isMountainLion;
 const originalType = os.type;
+const originalArch = os.arch;
 
 describe('Mac fallback', function () {
   const original = utils.isMountainLion;
@@ -52,6 +53,9 @@ describe('Mac fallback', function () {
 
 describe('terminal-notifier', function () {
   beforeEach(function () {
+    os.arch = function () {
+      return 'x64';
+    };
     os.type = function () {
       return 'Darwin';
     };
@@ -67,6 +71,7 @@ describe('terminal-notifier', function () {
 
   afterEach(function () {
     os.type = originalType;
+    os.arch = originalArch;
     utils.isMountainLion = originalMacVersion;
   });
 
