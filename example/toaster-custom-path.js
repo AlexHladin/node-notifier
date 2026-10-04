@@ -1,14 +1,18 @@
 const { WindowsToaster } = require('../');
 const path = require('path');
 
-const customPath = path.join(__dirname, 'resources', 'snoretoast-x64.exe');
+const resourceDir = path.join(
+  process.pkg ? path.dirname(process.execPath) : __dirname,
+  'resources'
+);
+const customPath = path.join(resourceDir, 'snoretoast-x64.exe');
 const notifierOptions = { withFallback: false, customPath };
 const notifier = new WindowsToaster(notifierOptions);
 
 notifier.notify(
   {
     message: 'Hello!',
-    icon: path.join(__dirname, 'resources', 'coulson.jpg'),
+    icon: path.join(resourceDir, 'coulson.jpg'),
     sound: true
   },
   function(err, data) {

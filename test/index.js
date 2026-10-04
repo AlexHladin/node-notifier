@@ -16,12 +16,8 @@ describe('constructors', function() {
     const data = { title: 'My notification' };
 
     const base = notifier.notify.bind(notifier, data);
-    expect(base.bind(notifier, wrongParamOne)).toThrowError(
-      /^The second argument/
-    );
-    expect(base.bind(notifier, wrongParamTwo)).toThrowError(
-      /^The second argument/
-    );
+    expect(base.bind(notifier, wrongParamOne)).toThrow(/^The second argument/);
+    expect(base.bind(notifier, wrongParamTwo)).toThrow(/^The second argument/);
   });
 
   it('should expose a default selected constructor function', function() {
