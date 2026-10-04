@@ -1,4 +1,6 @@
-# node-notifier [![NPM version][npm-image]][npm-url] [![Install size][size-image]][size-url] [![Build Status][travis-image]][travis-url]
+# node-notifier-v2 [![NPM version][npm-image]][npm-url] [![Install size][size-image]][size-url] [![Build Status][travis-image]][travis-url]
+
+`node-notifier-v2` is a new version of the [node-notifier](https://github.com/mikaelbr/node-notifier) library, maintained as a fork under a new package name.
 
 Send cross platform native notifications using Node.js. Notification Center for macOS,
 `notify-osd`/`libnotify-bin` for Linux, Toasters for Windows 8/10, or taskbar balloons for
@@ -21,7 +23,7 @@ earlier Windows versions. Growl is used if none of these requirements are met.
 Show a native notification on macOS, Windows, Linux:
 
 ```javascript
-const notifier = require('node-notifier');
+const notifier = require('node-notifier-v2');
 // String
 notifier.notify('Message');
 
@@ -31,6 +33,34 @@ notifier.notify({
   message: 'Hello, there!'
 });
 ```
+
+## Updating from node-notifier
+
+Replace the original package with `node-notifier-v2`:
+
+```shell
+npm uninstall node-notifier
+npm install --save node-notifier-v2
+```
+
+Update your imports or `require` calls to use the new package name:
+
+```javascript
+// Before
+const notifier = require('node-notifier');
+
+// After
+const notifier = require('node-notifier-v2');
+```
+
+For ES modules, change `import notifier from 'node-notifier'` to
+`import notifier from 'node-notifier-v2'`. Also update any direct reporter imports
+(for example, `node-notifier/notifiers/toaster` becomes
+`node-notifier-v2/notifiers/toaster`) and packaging configuration paths that refer
+to `node_modules/node-notifier`.
+
+The notification API remains the same, so existing `notify` calls, options, and
+event handlers can stay as they are.
 
 ## Requirements
 
@@ -44,7 +74,7 @@ See [documentation and flow chart for reporter choice](./DECISION_FLOW.md).
 ## Install
 
 ```shell
-npm install --save node-notifier
+npm install --save node-notifier-v2
 ```
 
 ## <abbr title="Command Line Interface">CLI</abbr>
@@ -59,7 +89,7 @@ Standard usage, with cross-platform fallbacks as defined in the
 below will work in some way or another on most platforms.
 
 ```javascript
-const notifier = require('node-notifier');
+const notifier = require('node-notifier-v2');
 const path = require('path');
 
 notifier.notify(
@@ -93,19 +123,19 @@ See below for documentation on each reporter.
 **Example:**
 
 ```javascript
-const NotificationCenter = require('node-notifier/notifiers/notificationcenter');
+const NotificationCenter = require('node-notifier-v2/notifiers/notificationcenter');
 new NotificationCenter(options).notify();
 
-const NotifySend = require('node-notifier/notifiers/notifysend');
+const NotifySend = require('node-notifier-v2/notifiers/notifysend');
 new NotifySend(options).notify();
 
-const WindowsToaster = require('node-notifier/notifiers/toaster');
+const WindowsToaster = require('node-notifier-v2/notifiers/toaster');
 new WindowsToaster(options).notify();
 
-const Growl = require('node-notifier/notifiers/growl');
+const Growl = require('node-notifier-v2/notifiers/growl');
 new Growl(options).notify();
 
-const WindowsBalloon = require('node-notifier/notifiers/balloon');
+const WindowsBalloon = require('node-notifier-v2/notifiers/balloon');
 new WindowsBalloon(options).notify();
 ```
 
@@ -113,7 +143,7 @@ Or, if you are using several reporters (or you're lazy):
 
 ```javascript
 // NOTE: Technically, this takes longer to require
-const nn = require('node-notifier');
+const nn = require('node-notifier-v2');
 
 new nn.NotificationCenter(options).notify();
 new nn.NotifySend(options).notify();
@@ -140,7 +170,7 @@ error will be returned in the callback.
 
 #### Example
 
-Because `node-notifier` wraps around [**`terminal-notifier`**](https://github.com/julienXX/terminal-notifier),
+Because `node-notifier-v2` wraps around [**`terminal-notifier`**](https://github.com/julienXX/terminal-notifier),
 you can do anything `terminal-notifier` can, just by passing properties to the `notify`
 method.
 
@@ -155,7 +185,7 @@ but they aren't documented.
 ### All notification options with their defaults:
 
 ```javascript
-const NotificationCenter = require('node-notifier').NotificationCenter;
+const NotificationCenter = require('node-notifier-v2').NotificationCenter;
 
 var notifier = new NotificationCenter({
   withFallback: false, // Use Growl Fallback if <= 10.8
@@ -261,7 +291,7 @@ specified at installation of your app. For example: If you use the squirrel
 framework, your `appID` will be something like `com.squirrel.your.app`.
 
 ```javascript
-const WindowsToaster = require('node-notifier').WindowsToaster;
+const WindowsToaster = require('node-notifier-v2').WindowsToaster;
 
 var notifier = new WindowsToaster({
   withFallback: false, // Fallback to Growl or Balloons?
@@ -288,7 +318,7 @@ notifier.notify(
 ### Usage: `Growl`
 
 ```javascript
-const Growl = require('node-notifier').Growl;
+const Growl = require('node-notifier-v2').Growl;
 
 var notifier = new Growl({
   name: 'Growl Name Used', // Defaults as 'Node'
@@ -318,7 +348,7 @@ fallback is activated and Growl is running). The balloons notifier uses a great
 project called [**`notifu`**](http://www.paralint.com/projects/notifu/).
 
 ```javascript
-const WindowsBalloon = require('node-notifier').WindowsBalloon;
+const WindowsBalloon = require('node-notifier-v2').WindowsBalloon;
 
 var notifier = new WindowsBalloon({
   withFallback: false, // Try Windows Toast and Growl first?
@@ -347,7 +377,7 @@ See full usage on the [project homepage: **`notifu`**](http://www.paralint.com/p
 **Note:** `notify-send` doesn't support the `wait` flag.
 
 ```javascript
-const NotifySend = require('node-notifier').NotifySend;
+const NotifySend = require('node-notifier-v2').NotifySend;
 
 var notifier = new NotifySend();
 
@@ -371,8 +401,8 @@ See flags and options on the man page [`notify-send(1)`](http://manpages.ubuntu.
 
 ## Thanks to OSS
 
-`node-notifier` is made possible through Open Source Software.
-A very special thanks to all the modules `node-notifier` uses.
+`node-notifier-v2` is made possible through Open Source Software.
+A very special thanks to all the modules `node-notifier-v2` uses.
 
 - [`terminal-notifier`](https://github.com/julienXX/terminal-notifier)
 - [`Snoretoast`](https://github.com/KDE/snoretoast/releases/tag/v0.7.0)
@@ -399,7 +429,7 @@ If you don't see notifications within WSL2, you might have to change permission 
 
 ### Use inside tmux session
 
-When using `node-notifier` within a tmux session, it can cause a hang in the system.
+When using `node-notifier-v2` within a tmux session, it can cause a hang in the system.
 This can be solved by following the steps described in [this comment](https://github.com/julienXX/terminal-notifier/issues/115#issuecomment-104214742)
 
 There’s even more info [here](https://github.com/mikaelbr/node-notifier/issues/61#issuecomment-163560801)
@@ -407,12 +437,12 @@ There’s even more info [here](https://github.com/mikaelbr/node-notifier/issues
 
 ### macOS: Custom icon without Terminal icon
 
-Even if you define an icon in the configuration object for `node-notifier`, you will
+Even if you define an icon in the configuration object for `node-notifier-v2`, you will
 see a small Terminal icon in the notification (see the example at the top of this
 document).
 
 This is the way notifications on macOS work. They always show the icon of the
-parent application initiating the notification. For `node-notifier`, `terminal-notifier`
+parent application initiating the notification. For `node-notifier-v2`, `terminal-notifier`
 is the initiator, and it has the Terminal icon defined as its icon.
 
 To define your custom icon, you need to fork `terminal-notifier` and build your
@@ -423,17 +453,17 @@ See [Issue #71 for more info](https://github.com/mikaelbr/node-notifier/issues/7
 
 ### Within Electron Packaging
 
-If packaging your Electron app as an `asar`, you will find `node-notifier` will fail to load.
+If packaging your Electron app as an `asar`, you will find `node-notifier-v2` will fail to load.
 
 Due to the way asar works, you cannot execute a binary from within an `asar`.
 As a simple solution, when packaging the app into an asar please make sure you
-`--unpack` the `vendor/` folder of `node-notifier`, so the module still has access to
+`--unpack` the `vendor/` folder of `node-notifier-v2`, so the module still has access to
 the notification binaries.
 
 You can do so with the following command:
 
 ```bash
-asar pack . app.asar --unpack "./node_modules/node-notifier/vendor/**"
+asar pack . app.asar --unpack "./node_modules/node-notifier-v2/vendor/**"
 ```
 
 Or if you use `electron-builder` without using asar directly, append `build` object to your `package.json` as below:
@@ -442,7 +472,7 @@ Or if you use `electron-builder` without using asar directly, append `build` obj
 ...
 build: {
   asarUnpack: [
-    './node_modules/node-notifier/**/*',
+    './node_modules/node-notifier-v2/**/*',
   ]
 },
 ...
@@ -454,11 +484,11 @@ For issues using with the pkg module. Check this issue out: https://github.com/m
 
 ### Using Webpack
 
-When using `node-notifier` inside of `webpack`, you must add the snippet below to your `webpack.config.js`.
+When using `node-notifier-v2` inside of `webpack`, you must add the snippet below to your `webpack.config.js`.
 
-This is necessary because `node-notifier` loads the notifiers from a binary, so it
+This is necessary because `node-notifier-v2` loads the notifiers from a binary, so it
 needs a relative file path. When webpack compiles the modules, it suppresses file
-directories, causing `node-notifier` to error on certain platforms.
+directories, causing `node-notifier-v2` to error on certain platforms.
 
 To fix this, you can configure webpack to keep the relative file directories.
 Do so by append the following code to your `webpack.config.js`:
@@ -476,10 +506,10 @@ This package is licensed using the [MIT License](http://en.wikipedia.org/wiki/MI
 
 [SnoreToast](https://raw.githubusercontent.com/mikaelbr/node-notifier/master/vendor/snoreToast/LICENSE) and [Notifu](https://raw.githubusercontent.com/mikaelbr/node-notifier/master/vendor/notifu/LICENSE) have licenses in their vendored versions which do not match the MIT license, LGPL-3 and BSD 3-Clause to be specific. We are not lawyers, but have made our best efforts to conform to the terms in those licenses while releasing this package using the license we chose.
 
-[npm-url]: https://npmjs.org/package/node-notifier
-[npm-image]: http://img.shields.io/npm/v/node-notifier.svg?style=flat
-[size-url]: https://packagephobia.com/result?p=node-notifier
-[size-image]: https://packagephobia.com/badge?p=node-notifier
-[npm-downloads]: http://img.shields.io/npm/dm/node-notifier.svg?style=flat
+[npm-url]: https://npmjs.org/package/node-notifier-v2
+[npm-image]: http://img.shields.io/npm/v/node-notifier-v2.svg?style=flat
+[size-url]: https://packagephobia.com/result?p=node-notifier-v2
+[size-image]: https://packagephobia.com/badge?p=node-notifier-v2
+[npm-downloads]: http://img.shields.io/npm/dm/node-notifier-v2.svg?style=flat
 [travis-url]: http://travis-ci.org/mikaelbr/node-notifier
 [travis-image]: http://img.shields.io/travis/mikaelbr/node-notifier.svg?style=flat
