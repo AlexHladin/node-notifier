@@ -2,5 +2,5 @@ example/
 test
 *.md
 node-notifier_flow.png
-.eslintrc
+.oxlintrc.json
 .travis.yml
