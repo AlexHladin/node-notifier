@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/AlexHladin/node-notifier/compare/node-notifier-v2-v1.0.0...node-notifier-v2-v1.0.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* avoid exec usage ([8783871](https://github.com/AlexHladin/node-notifier/commit/87838712ad327b925bbfff944f4bba40bd2d8c4c))
+* lint fix ([926cddc](https://github.com/AlexHladin/node-notifier/commit/926cddc94ba26fd335c5109fef9d7f284b7c5f8c))
+* lint fix ([0ee9180](https://github.com/AlexHladin/node-notifier/commit/0ee9180ef9b181da15ac0ee08672a18ce559306b))
+
 ## 1.0.0 (2026-10-05)
 
 
