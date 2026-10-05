@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.0.0 (2026-10-05)
+
+
+### Features
+
+* adds note in Readme for SnoreToast ([027f0d6](https://github.com/AlexHladin/node-notifier/commit/027f0d6c837542459357d59bcc8aee1bf447a9fb))
+* implements proper timeout/wait behaviour for notify-send ([ee7916a](https://github.com/AlexHladin/node-notifier/commit/ee7916a60ca3d8fc9e5994cdd301c51f5bd56d9a))
+* implements proper timeout/wait behaviour for notify-send ([860c06e](https://github.com/AlexHladin/node-notifier/commit/860c06e192540e11a93d63d50fc5008ba2c1fa3b))
+* remove jest ([6d9110b](https://github.com/AlexHladin/node-notifier/commit/6d9110bec1b0c194391ec8d405cecb8bdd5831a9))
+* remove jest ([0725e45](https://github.com/AlexHladin/node-notifier/commit/0725e45a356b0417b1b5445ba1095929667d7eb4))
+
+
+### Bug Fixes
+
+* `options.customPath` doesn't work for windows toaster ([#373](https://github.com/AlexHladin/node-notifier/issues/373)) ([c1b2e66](https://github.com/AlexHladin/node-notifier/commit/c1b2e6658b195ba4176b5eff312605d24ffa59ce))
+* **debug:** correct debug note in contribute guide ([a14a82f](https://github.com/AlexHladin/node-notifier/commit/a14a82f0437d68ddf981d3620c5d75cde76f5030))
+* **debug:** fix ci errors ([7b34c19](https://github.com/AlexHladin/node-notifier/commit/7b34c194aae34cb01a2ea305fded88ebf831d754))
+* **debug:** use a more specific condition for enabling debug logging ([00b6984](https://github.com/AlexHladin/node-notifier/commit/00b6984f5b6efd98474cc4d7cc49b5de38646d5d))
+* fix tests ([7fb81d6](https://github.com/AlexHladin/node-notifier/commit/7fb81d689db65e9d8d3472b6ea2d4b519a578a22))
+* fixes mapping on snoretoast activate event, fixes [#291](https://github.com/AlexHladin/node-notifier/issues/291) ([e55bd8f](https://github.com/AlexHladin/node-notifier/commit/e55bd8fa64b6712ef00e108dd02ec9833f4d4d1f))
+* fixes mapping on snoretoast activate event, fixes [#291](https://github.com/AlexHladin/node-notifier/issues/291) ([377b4d4](https://github.com/AlexHladin/node-notifier/commit/377b4d451ce0f39d1c2570aa377cf54722a1b648))
+* Issue [#294](https://github.com/AlexHladin/node-notifier/issues/294) NSAllowsArbitraryLoads flag set to false ([14af678](https://github.com/AlexHladin/node-notifier/commit/14af6787a1de8b151ebb5360fe2e0755d848eaf3))
+* Issue [#294](https://github.com/AlexHladin/node-notifier/issues/294) NSAllowsArbitraryLoads flag set to false to avoid security issues raised by code-analysers ([b61bbd8](https://github.com/AlexHladin/node-notifier/commit/b61bbd842627d18139ad7f2ecabf862723bcce4a))
+* link notifier time property to notify-send expire-time flag ([e8f56e3](https://github.com/AlexHladin/node-notifier/commit/e8f56e3e1054f0c1e54c5bbf099bc03a296c5c6b))
+* link notifier time property to notify-send expire-time flag ([8df46ab](https://github.com/AlexHladin/node-notifier/commit/8df46ab130e3adf962bf7114c32207c810bbc81f))
+* mac notifications ([014c1ec](https://github.com/AlexHladin/node-notifier/commit/014c1ec2461780a4bd7650a680e206a2bbc1b798))
+* tests pipeline ([317e207](https://github.com/AlexHladin/node-notifier/commit/317e2072d9f3c5b08584db798d7e50f47494fc64))
+* tests pipeline ([848b036](https://github.com/AlexHladin/node-notifier/commit/848b03663b564fd6a3469674521a5cfb7531db2d))
+* update mac notification ([4212fb5](https://github.com/AlexHladin/node-notifier/commit/4212fb524bbf96876ba1a5a1df69392c2f14fa16))
+* update package.json ([379311a](https://github.com/AlexHladin/node-notifier/commit/379311ae80a73f74eaa113e9f12be608a41a51d1))
+* vulnerable dependencies ([cb59ece](https://github.com/AlexHladin/node-notifier/commit/cb59ececddec9463d582d0019f9174863b380b6b))
+* vulnerable dependencies ([aad156b](https://github.com/AlexHladin/node-notifier/commit/aad156bcf3adbf726571a3ba067ec8be84b558db))
+
+## Changelog
+
 ### `v10.0.1`
 
 Fixes:
