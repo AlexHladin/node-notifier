@@ -2,7 +2,7 @@
 
 `node-notifier-v2` is a new version of the [node-notifier](https://github.com/mikaelbr/node-notifier) library, maintained as a fork under a new package name.
 
-Send cross platform native notifications using Node.js. Notification Center for macOS,
+Send cross platform native notifications using Node.js. Native Notification Center for macOS (Intel and Apple Silicon),
 `notify-osd`/`libnotify-bin` for Linux, Toasters for Windows 8/10, or taskbar balloons for
 earlier Windows versions. Growl is used if none of these requirements are met.
 [Works well with Electron](#within-electron-packaging).
@@ -59,12 +59,14 @@ For ES modules, change `import notifier from 'node-notifier'` to
 `node-notifier-v2/notifiers/toaster`) and packaging configuration paths that refer
 to `node_modules/node-notifier`.
 
-The notification API remains the same, so existing `notify` calls, options, and
-event handlers can stay as they are.
+The notification API remains available, including macOS reply fields, actions,
+and interaction events. Intel Macs use the original terminal-notifier helper;
+Apple Silicon Macs use the bundled ARM64 Alerter helper on macOS 13 or newer.
+See [macOS usage](#usage-notificationcenter) for helper selection and basic fallback behavior.
 
 ## Requirements
 
-- **macOS**: >= 10.8 for native notifications, or Growl if earlier.
+- **macOS**: Intel >= 10.8 with bundled terminal-notifier; Apple Silicon >= 13 with bundled ARM64 Alerter. No Rosetta is needed for the ARM64 helper. Basic notifications can use built-in `osascript` on macOS >= 10.9 when a native helper cannot launch. Growl is the fallback on older systems.
 - **Linux**: `notify-osd` or `libnotify-bin` installed (Ubuntu should have this by default)
 - **Windows**: >= 8, or task bar balloons for Windows < 8. Growl as fallback. Growl takes precedence over Windows balloons.
 - **General Fallback**: Growl
@@ -162,25 +164,52 @@ new nn.Growl(options).notify(options);
 
 ### Usage: `NotificationCenter`
 
-Same usage and parameter setup as [**`terminal-notifier`**](https://github.com/julienXX/terminal-notifier).
+The backend automatically selects a bundled native helper:
 
-Native Notification Center requires macOS version 10.8 or higher. If you have
-an earlier version, Growl will be the fallback. If Growl isn't installed, an
-error will be returned in the callback.
+- **Intel:** the original terminal-notifier application (macOS 10.8+).
+- **Apple Silicon:** [Alerter v26.5](https://github.com/vjeantet/alerter/releases/tag/v26.5),
+  a reply-capable terminal-notifier successor (macOS 13+).
+
+Both provide reply/input fields, action buttons, notification groups, and
+interaction metadata. The JavaScript API translates the different helper CLIs
+and maps their events to `click`, `timeout`, and `replied`.
+
+On Apple Silicon macOS 11/12, or if a native helper is missing or cannot execute,
+basic notifications fall back to built-in `osascript`. Interactive requests
+return an `ENATIVEUNAVAILABLE` error instead of silently dropping those features.
+On older systems, `withFallback: true` enables Growl.
 
 #### Example
 
-Because `node-notifier-v2` wraps around [**`terminal-notifier`**](https://github.com/julienXX/terminal-notifier),
-you can do anything `terminal-notifier` can, just by passing properties to the `notify`
-method.
+Set `reply: true` to show an input field and read the user's text from
+`metadata.activationValue`. Set `actions` to a string or array of labels to show
+buttons. Listen for `replied` or `click` to handle the interaction.
 
-For example:
+On Apple Silicon, `reply: true` uses `Reply` as the input placeholder. Supply a
+nonempty string such as `reply: 'Type your answer'` to customize it.
 
-- if `terminal-notifier` says `-message`, you can do `{message: 'Foo'}`
-- if `terminal-notifier` says `-list ALL`, you can do `{list: 'ALL'}`.
+```javascript
+const notifier = require('node-notifier-v2');
 
-Notification is the primary focus of this module, so listing and activating do work,
-but they aren't documented.
+notifier.notify(
+  {
+    title: 'Question',
+    message: 'What is your name?',
+    reply: true,
+    timeout: 60
+  },
+  function (error, response, metadata) {
+    if (error) return console.error(error);
+    if (response === 'replied') console.log(metadata.activationValue);
+  }
+);
+```
+
+Apple Silicon notifications support reply fields **or** action buttons in one
+notification; use separate notifications for these interactions. Action arrays
+are passed to Alerter as comma-separated labels, so labels should not contain
+commas. Icons and attached images rely on macOS private APIs and can vary between
+OS releases.
 
 ### All notification options with their defaults:
 
@@ -189,7 +218,7 @@ const NotificationCenter = require('node-notifier-v2').NotificationCenter;
 
 var notifier = new NotificationCenter({
   withFallback: false, // Use Growl Fallback if <= 10.8
-  customPath: undefined // Relative/Absolute path to binary if you want to use your own fork of terminal-notifier
+  customPath: undefined // Optional native helper path; see helper selection below
 });
 
 notifier.notify(
@@ -203,7 +232,7 @@ notifier.notify(
     open: undefined, // URL to open on Click
     wait: false, // Wait for User Action against Notification or times out. Same as timeout = 5 seconds
 
-    // New in latest version. See `example/macInput.js` for usage
+    // See `example/macInput.js` for reply and action examples
     timeout: 5, // Takes precedence over wait if both are defined.
     closeLabel: undefined, // String. Label for cancel button
     actions: undefined, // String | Array<String>. Action label or list of labels in case of dropdown
@@ -221,14 +250,18 @@ notifier.notify(
 **Note:** The `wait` option is shorthand for `timeout: 5`. This just sets a timeout
 for 5 seconds. It does _not_ make the notification sticky!
 
-As of Version 6.0 there is a default `timeout` set of `10` to ensure that the application closes properly. In order to remove the `timeout` and have an instantly closing notification (does not support actions), set `timeout` to `false`. If you are using `action` it is recommended to set `timeout` to a high value to ensure the user has time to respond.
+The default `timeout` is 10 seconds, or 5 seconds with `wait: true`. An explicit
+`timeout` takes precedence. Use a longer timeout for reply fields and actions.
+`timeout: false` disables the timeout; on the Apple Silicon helper this waits
+until the user interacts with the notification. Timeouts on Apple Silicon must
+be whole seconds.
 
 _Exception:_ If `reply` is defined, it's recommended to set `timeout` to a either
 high value, or to nothing at all.
 
 ---
 
-**For macOS notifications: `icon`, `contentImage`, and all forms of `reply`/`actions` require macOS 10.9.**
+**Intel reply/actions require macOS 10.9+. The Apple Silicon helper requires macOS 13+.**
 
 Sound can be one of these: `Basso`, `Blow`, `Bottle`, `Frog`, `Funk`, `Glass`,
 `Hero`, `Morse`, `Ping`, `Pop`, `Purr`, `Sosumi`, `Submarine`, `Tink`.
@@ -244,16 +277,37 @@ If `sound` is simply `true`, `Bottle` is used.
 
 ---
 
-**Custom Path clarification**
+**Helper selection and custom paths**
 
-`customPath` takes a value of a relative or absolute path to the binary of your
-fork/custom version of **`terminal-notifier`**.
+`customPath` overrides the native executable and defaults to the legacy
+terminal-notifier CLI. To use another modern Alerter executable, specify
+`backend: 'alerter'` along with `customPath`. Keep an app-based helper inside its
+application bundle. The bundled Intel app lives in `mac.noindex` to prevent
+Spotlight indexing it.
 
-**Example:** `./vendor/mac.noindex/terminal-notifier.app/Contents/MacOS/terminal-notifier`
+**Basic osascript fallback**
 
-**Spotlight clarification**
+You can explicitly choose basic notifications:
 
-`terminal-notifier.app` resides in a `mac.noindex` folder to prevent Spotlight from indexing the app.
+```javascript
+const notifier = new (require('node-notifier-v2').NotificationCenter)({
+  backend: 'osascript',
+  osascriptPath: '/usr/bin/osascript' // Optional override for the basic fallback
+});
+notifier.notify({ title: 'Hello', message: 'Basic notification', sound: true });
+```
+
+This fallback supports `message` (or `text`), `title`, `subtitle`, and `sound`.
+It does not support input, actions, icons, `open`, grouping/listing/removal,
+`wait`, or `timeout`; requests using these options return an error. It emits no
+interaction events. Its callback runs when the script exits with stdout
+(normally empty) as the response and `{}` as metadata. Script completion does
+not confirm that macOS displayed the notification.
+
+Allow notifications for the sender in System Settings → Notifications and check
+Focus settings if nothing appears. Alerter defaults to the Terminal sender;
+`osascript` typically uses Script Editor. Native interaction behavior and
+permissions still need to be checked on the target Mac.
 
 ### Usage: `WindowsToaster`
 
@@ -405,6 +459,7 @@ See flags and options on the man page [`notify-send(1)`](http://manpages.ubuntu.
 A very special thanks to all the modules `node-notifier-v2` uses.
 
 - [`terminal-notifier`](https://github.com/julienXX/terminal-notifier)
+- [`Alerter`](https://github.com/vjeantet/alerter)
 - [`Snoretoast`](https://github.com/KDE/snoretoast/releases/tag/v0.7.0)
 - [`notifu`](http://www.paralint.com/projects/notifu/)
 - [`growly`](https://github.com/theabraham/growly/)
@@ -435,21 +490,12 @@ This can be solved by following the steps described in [this comment](https://gi
 There’s even more info [here](https://github.com/mikaelbr/node-notifier/issues/61#issuecomment-163560801)
 <https://github.com/mikaelbr/node-notifier/issues/61#issuecomment-163560801>.
 
-### macOS: Custom icon without Terminal icon
+### macOS: Missing notifications or custom icons
 
-Even if you define an icon in the configuration object for `node-notifier-v2`, you will
-see a small Terminal icon in the notification (see the example at the top of this
-document).
-
-This is the way notifications on macOS work. They always show the icon of the
-parent application initiating the notification. For `node-notifier-v2`, `terminal-notifier`
-is the initiator, and it has the Terminal icon defined as its icon.
-
-To define your custom icon, you need to fork `terminal-notifier` and build your
-custom version with your icon.
-
-See [Issue #71 for more info](https://github.com/mikaelbr/node-notifier/issues/71)
-<https://github.com/mikaelbr/node-notifier/issues/71>.
+Allow notifications for the sender in System Settings → Notifications and check
+Focus settings. Alerter defaults to the Terminal sender. Custom icons and
+attached images use private macOS APIs and may not work on every OS release.
+The `osascript` fallback does not support custom icons or interactions.
 
 ### Within Electron Packaging
 

@@ -10,9 +10,10 @@ nc.notify(
     sound: 'Funk',
     // case sensitive
     closeLabel: 'Absolutely not',
-    actions: trueAnswer
+    actions: trueAnswer,
+    timeout: 60
   },
-  function(err, response, metadata) {
+  function (err, response, metadata) {
     if (err) throw err;
     console.log(metadata);
 
@@ -26,9 +27,10 @@ nc.notify(
         message: 'Do you want to reply to them?',
         sound: 'Funk',
         // case sensitive
-        reply: true
+        reply: true,
+        timeout: 60
       },
-      function(err, response, metadata) {
+      function (err, response, metadata) {
         if (err) throw err;
         console.log(metadata);
       }
@@ -36,6 +38,6 @@ nc.notify(
   }
 );
 
-nc.on('replied', function(obj, options, metadata) {
+nc.on('replied', function (obj, options, metadata) {
   console.log('User replied', metadata);
 });
