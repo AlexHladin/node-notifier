@@ -1,4 +1,4 @@
-# node-notifier-v2 [![NPM version][npm-image]][npm-url] [![Install size][size-image]][size-url] [![Build Status][travis-image]][travis-url]
+# node-notifier-v2 [![NPM version][npm-image]][npm-url]
 
 `node-notifier-v2` is a new version of the [node-notifier](https://github.com/mikaelbr/node-notifier) library, maintained as a fork under a new package name.
 
@@ -554,8 +554,4 @@ This package is licensed using the [MIT License](http://en.wikipedia.org/wiki/MI
 
 [npm-url]: https://npmjs.org/package/node-notifier-v2
 [npm-image]: http://img.shields.io/npm/v/node-notifier-v2.svg?style=flat
-[size-url]: https://packagephobia.com/result?p=node-notifier-v2
-[size-image]: https://packagephobia.com/badge?p=node-notifier-v2
 [npm-downloads]: http://img.shields.io/npm/dm/node-notifier-v2.svg?style=flat
-[travis-url]: http://travis-ci.org/mikaelbr/node-notifier
-[travis-image]: http://img.shields.io/travis/mikaelbr/node-notifier.svg?style=flat
