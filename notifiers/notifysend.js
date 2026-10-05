@@ -73,13 +73,20 @@ function notifyRaw(options, callback) {
 }
 
 Object.defineProperty(NotifySend.prototype, 'notify', {
-  get: function() {
+  get: function () {
     if (!this._notify) this._notify = notifyRaw.bind(this);
     return this._notify;
   }
 });
 
-const allowedArguments = ['urgency', 'expire-time', 'icon', 'category', 'hint', 'app-name'];
+const allowedArguments = [
+  'urgency',
+  'expire-time',
+  'icon',
+  'category',
+  'hint',
+  'app-name'
+];
 
 function doNotification(options, callback) {
   options = utils.mapToNotifySend(options);
@@ -89,11 +96,17 @@ function doNotification(options, callback) {
   delete options.title;
   delete options.message;
 
+  const rawArguments = { noEscape: true, wrapper: '', keepNewlines: true };
   const argsList = utils.constructArgumentList(options, {
-    initial: initial,
+    ...rawArguments,
     keyExtra: '-',
     allowedArguments: allowedArguments
   });
+  // Keep notification text out of option parsing as well as shell parsing.
+  argsList.push(
+    '--',
+    ...utils.constructArgumentList({}, { ...rawArguments, initial })
+  );
 
   utils.command(notifier, argsList, callback);
 }

@@ -103,7 +103,9 @@ function notifyRaw(options, callback) {
     // Due to an issue with snoretoast not using stdio and pipe
     // when notifications are disabled, make sure named pipe server
     // is closed before exiting.
-    server.instance && server.instance.close();
+    if (server.instance) {
+      server.instance.close();
+    }
   };
 
   const actionJackedCallback = (err) =>

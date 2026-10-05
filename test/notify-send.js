@@ -26,110 +26,142 @@ describe('notify-send', function () {
     };
   }
 
-  it('should pass on title and body', function (_context, done) {
-    const expected = ['"title"', '"body"', '--expire-time', '"10000"'];
-    expectArgsListToBe(expected, done);
-    const notifier = new Notify({ suppressOsdCheck: true });
-    notifier.notify({ title: 'title', message: 'body' });
+  it('passes raw title and body after an option terminator', function (_context, done) {
+    expectArgsListToBe(['--expire-time', '10000', '--', 'title', 'body'], done);
+    new Notify({ suppressOsdCheck: true }).notify({
+      title: 'title',
+      message: 'body'
+    });
   });
 
-  it('should pass have default title', function (_context, done) {
-    const expected = [
-      '"Node Notification:"',
-      '"body"',
-      '--expire-time',
-      '"10000"'
-    ];
-
-    expectArgsListToBe(expected, done);
-    const notifier = new Notify({ suppressOsdCheck: true });
-    notifier.notify({ message: 'body' });
+  it('uses the default title', function (_context, done) {
+    expectArgsListToBe(
+      ['--expire-time', '10000', '--', 'Node Notification:', 'body'],
+      done
+    );
+    new Notify({ suppressOsdCheck: true }).notify({ message: 'body' });
   });
 
-  it('should throw error if no message is passed', function (_context, done) {
-    utils.command = function (_notifier, argsList) {
-      assert.strictEqual(argsList, undefined);
+  it('reports a missing message', function (_context, done) {
+    utils.command = function () {
+      assert.fail('Notification must not execute');
     };
-
-    const notifier = new Notify({ suppressOsdCheck: true });
-    notifier.notify({}, function (err) {
-      assert.strictEqual(err.message, 'Message is required.');
+    new Notify({ suppressOsdCheck: true }).notify({}, function (error) {
+      assert.strictEqual(error.message, 'Message is required.');
       done();
     });
   });
 
-  it('should escape message input', function (_context, done) {
-    const excapedNewline = process.platform === 'win32' ? '\\r\\n' : '\\n';
-    const expected = [
-      '"Node Notification:"',
-      '"some' + excapedNewline + ' \\"me\'ss\\`age\\`\\""',
-      '--expire-time',
-      '"10000"'
-    ];
-
-    expectArgsListToBe(expected, done);
-    const notifier = new Notify({ suppressOsdCheck: true });
-    notifier.notify({ message: 'some\n "me\'ss`age`"' });
-  });
-
-  it('should escape array items as normal items', function (_context, done) {
-    const expected = [
-      '"Hacked"',
-      '"\\`touch HACKED\\`"',
-      '--app-name',
-      '"foo\\`touch exploit\\`"',
-      '--category',
-      '"foo\\`touch exploit\\`"',
-      '--expire-time',
-      '"10000"'
-    ];
-
-    expectArgsListToBe(expected, done);
-    const notifier = new Notify({ suppressOsdCheck: true });
-    const options = JSON.parse(
-      `{
-        "title": "Hacked",
-        "message":["\`touch HACKED\`"],
-        "app-name": ["foo\`touch exploit\`"],
-        "category": ["foo\`touch exploit\`"]
-      }`
+  it('preserves quotes, newlines, backslashes, and shell syntax as text', function (_context, done) {
+    const message = 'some\n "quotes" \\ $HOME $(ignored) `ignored`; Unicode ☃';
+    expectArgsListToBe(
+      ['--expire-time', '10000', '--', 'Node Notification:', message],
+      done
     );
-    notifier.notify(options);
+    new Notify({ suppressOsdCheck: true }).notify({ message });
   });
 
-  it('should send additional parameters as --"keyname"', function (_context, done) {
-    const expected = [
-      '"title"',
-      '"body"',
-      '--icon',
-      '"icon-string"',
-      '--expire-time',
-      '"10000"'
-    ];
-
-    expectArgsListToBe(expected, done);
-    const notifier = new Notify({ suppressOsdCheck: true });
-    notifier.notify({ title: 'title', message: 'body', icon: 'icon-string' });
+  it('joins array values without shell quoting or stripping newlines', function (_context, done) {
+    expectArgsListToBe(
+      [
+        '--app-name',
+        'foo`touch exploit`',
+        '--category',
+        'first\nline,second',
+        '--expire-time',
+        '10000',
+        '--',
+        'Hacked',
+        '`touch HACKED`'
+      ],
+      done
+    );
+    new Notify({ suppressOsdCheck: true }).notify({
+      title: 'Hacked',
+      message: ['`touch HACKED`'],
+      'app-name': ['foo`touch exploit`'],
+      category: ['first\nline', 'second']
+    });
   });
 
-  it('should remove extra options that are not supported by notify-send', function (_context, done) {
-    const expected = [
-      '"title"',
-      '"body"',
-      '--icon',
-      '"icon-string"',
-      '--expire-time',
-      '"1000"'
-    ];
+  it('passes supported flags as separate arguments', function (_context, done) {
+    expectArgsListToBe(
+      [
+        '--icon',
+        'icon-string',
+        '--expire-time',
+        '10000',
+        '--',
+        'title',
+        'body'
+      ],
+      done
+    );
+    new Notify({ suppressOsdCheck: true }).notify({
+      title: 'title',
+      message: 'body',
+      icon: 'icon-string'
+    });
+  });
 
-    expectArgsListToBe(expected, done);
-    const notifier = new Notify({ suppressOsdCheck: true });
-    notifier.notify({
+  it('filters unsupported options and maps expiration time', function (_context, done) {
+    expectArgsListToBe(
+      ['--icon', 'icon-string', '--expire-time', '1000', '--', 'title', 'body'],
+      done
+    );
+    new Notify({ suppressOsdCheck: true }).notify({
       title: 'title',
       message: 'body',
       icon: 'icon-string',
       time: 1,
       tullball: 'notValid'
     });
+  });
+
+  it('does not interpret leading dashes in notification text as flags', function (_context, done) {
+    expectArgsListToBe(
+      ['--expire-time', '10000', '--', '--help', '--version'],
+      done
+    );
+    new Notify({ suppressOsdCheck: true }).notify({
+      title: '--help',
+      message: '--version'
+    });
+  });
+
+  it('executes notify-send directly with raw arguments', function (context) {
+    const cp = require('node:child_process');
+    const execFile = context.mock.method(
+      cp,
+      'execFile',
+      (file, args, callback) => callback(null, 'output', 'warning')
+    );
+    context.mock.method(cp, 'exec', () =>
+      assert.fail('A shell must not be used')
+    );
+    const callback = context.mock.fn();
+    new Notify({ suppressOsdCheck: true }).notify(
+      { title: 'A title', message: '$(ignored); `ignored`' },
+      callback
+    );
+    assert.strictEqual(execFile.mock.callCount(), 1);
+    assert.deepStrictEqual(execFile.mock.calls[0].arguments.slice(0, 2), [
+      'notify-send',
+      ['--expire-time', '10000', '--', 'A title', '$(ignored); `ignored`']
+    ]);
+    assert.deepStrictEqual(callback.mock.calls[0].arguments, [null, 'output']);
+  });
+
+  it('propagates execution errors and stdout', function (context) {
+    const cp = require('node:child_process');
+    const error = Object.assign(new Error('Missing executable'), {
+      code: 'ENOENT'
+    });
+    context.mock.method(cp, 'execFile', (file, args, callback) =>
+      callback(error, 'output')
+    );
+    const callback = context.mock.fn();
+    utils.command('/a path/notifier', ['raw "argument"'], callback);
+    assert.deepStrictEqual(callback.mock.calls[0].arguments, [error, 'output']);
   });
 });
