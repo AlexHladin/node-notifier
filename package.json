@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "npm run lint",
-    "test": "jest",
+    "test": "node --test --test-timeout=5000 \"test/[!_]*.js\"",
     "example": "node ./example/message.js",
     "example:mac": "node ./example/advanced.js",
     "example:mac:input": "node ./example/macInput.js",
@@ -18,13 +18,6 @@
     "postexample:windows:nexe-custom-path": "cross-env DEBUG=notifier ./dist/toaster-custom-path.exe",
     "lint": "oxlint example lib notifiers test index.js",
     "prepare": "husky install"
-  },
-  "jest": {
-    "testRegex": "/test/[^_]*.js",
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "./test/_test-matchers.js"
-    ]
   },
   "repository": {
     "type": "git",
@@ -48,7 +41,6 @@
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "husky": "^8.0.1",
-    "jest": "^30.5.2",
     "lint-staged": "^16.4.0",
     "oxlint": "^1.86.0",
     "prettier": "^2.3.0",

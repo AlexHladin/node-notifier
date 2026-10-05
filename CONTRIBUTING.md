@@ -16,7 +16,6 @@ node-notifier debug info (fileCommandJson):
 [notifier options] -message "Hello" -timeout "5" -json "true"
 ```
 
-
 ## Building
 
 Fork, then clone the repo:
@@ -30,6 +29,10 @@ Install dependencies:
 ```shell
 npm install
 ```
+
+Use Node.js 22 or newer for development. Tests use Node's built-in test runner
+and strict assertions; no separate test framework is required. `npm test` runs
+oxlint before running the test files (excluding helper files beginning with `_`).
 
 Make sure the tests pass:
 

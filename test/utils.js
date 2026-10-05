@@ -1,3 +1,5 @@
+const { describe, it } = require('node:test');
+const assert = require('node:assert/strict');
 const path = require('path');
 const fs = require('fs');
 const _ = require('../lib/utils');
@@ -8,10 +10,10 @@ describe('utils', function () {
       const obj = { a: { b: 42 }, c: 123 };
       const obj2 = _.clone(obj);
 
-      expect(obj).toEqual(obj2);
+      assert.deepStrictEqual(obj, obj2);
       obj.a.b += 2;
       obj.c += 2;
-      expect(obj).not.toEqual(obj2);
+      assert.notDeepStrictEqual(obj, obj2);
     });
   });
 
@@ -24,13 +26,15 @@ describe('utils', function () {
         'expire-time': 10000
       };
 
-      expect(
-        _.mapToNotifySend({ title: 'Foo', message: 'Bar', appIcon: 'foobar' })
-      ).toEqual(expected);
+      assert.deepStrictEqual(
+        _.mapToNotifySend({ title: 'Foo', message: 'Bar', appIcon: 'foobar' }),
+        expected
+      );
 
-      expect(
-        _.mapToNotifySend({ title: 'Foo', message: 'Bar', i: 'foobar' })
-      ).toEqual(expected);
+      assert.deepStrictEqual(
+        _.mapToNotifySend({ title: 'Foo', message: 'Bar', i: 'foobar' }),
+        expected
+      );
     });
 
     it('should map short hand for notify-sned', function () {
@@ -42,9 +46,10 @@ describe('utils', function () {
         hint: 'e'
       };
 
-      expect(
-        _.mapToNotifySend({ u: 'a', e: 'b', c: 'c', i: 'd', h: 'e' })
-      ).toEqual(expected);
+      assert.deepStrictEqual(
+        _.mapToNotifySend({ u: 'a', e: 'b', c: 'c', i: 'd', h: 'e' }),
+        expected
+      );
     });
 
     it('should map icon for notification center', function () {
@@ -56,11 +61,13 @@ describe('utils', function () {
         json: true
       };
 
-      expect(
-        _.mapToMac({ title: 'Foo', message: 'Bar', icon: 'foobar' })
-      ).toEqual(expected);
+      assert.deepStrictEqual(
+        _.mapToMac({ title: 'Foo', message: 'Bar', icon: 'foobar' }),
+        expected
+      );
 
-      expect(_.mapToMac({ title: 'Foo', message: 'Bar', i: 'foobar' })).toEqual(
+      assert.deepStrictEqual(
+        _.mapToMac({ title: 'Foo', message: 'Bar', i: 'foobar' }),
         expected
       );
     });
@@ -72,15 +79,15 @@ describe('utils', function () {
       const expected = { title: 'Foo', message: 'Bar', icon: iconRead };
 
       let obj = _.mapToGrowl({ title: 'Foo', message: 'Bar', icon: icon });
-      expect(obj).toEqual(expected);
+      assert.deepStrictEqual(obj, expected);
 
-      expect(obj.icon).toBeTruthy();
-      expect(Buffer.isBuffer(obj.icon)).toBeTruthy();
+      assert.ok(obj.icon);
+      assert.ok(Buffer.isBuffer(obj.icon));
 
       obj = _.mapToGrowl({ title: 'Foo', message: 'Bar', appIcon: icon });
 
-      expect(obj.icon).toBeTruthy();
-      expect(Buffer.isBuffer(obj.icon)).toBeTruthy();
+      assert.ok(obj.icon);
+      assert.ok(Buffer.isBuffer(obj.icon));
     });
 
     it('should not map icon url for growl', function () {
@@ -88,13 +95,15 @@ describe('utils', function () {
 
       const expected = { title: 'Foo', message: 'Bar', icon: icon };
 
-      expect(
-        _.mapToGrowl({ title: 'Foo', message: 'Bar', icon: icon })
-      ).toEqual(expected);
+      assert.deepStrictEqual(
+        _.mapToGrowl({ title: 'Foo', message: 'Bar', icon: icon }),
+        expected
+      );
 
-      expect(
-        _.mapToGrowl({ title: 'Foo', message: 'Bar', appIcon: icon })
-      ).toEqual(expected);
+      assert.deepStrictEqual(
+        _.mapToGrowl({ title: 'Foo', message: 'Bar', appIcon: icon }),
+        expected
+      );
     });
   });
 });

@@ -1,3 +1,5 @@
+const { describe, it, beforeEach, afterEach } = require('node:test');
+const assert = require('node:assert/strict');
 const NotificationCenter = require('../notifiers/notificationcenter');
 const Growl = require('../notifiers/growl');
 const utils = require('../lib/utils');
@@ -20,7 +22,7 @@ describe('Mac fallback', function () {
     utils.isMac = originalMac;
   });
 
-  it('should default to Growl notification if older Mac OSX than 10.8', function (done) {
+  it('should default to Growl notification if older Mac OSX than 10.8', function (_context, done) {
     utils.isMountainLion = function () {
       return false;
     };
@@ -28,13 +30,13 @@ describe('Mac fallback', function () {
       return true;
     };
     const n = new NotificationCenter({ withFallback: true });
-    n.notify({ message: 'Hello World' }, function (_, response) {
-      expect(this).toBeInstanceOf(Growl);
+    n.notify({ message: 'Hello World' }, function () {
+      assert.ok(this instanceof Growl);
       done();
     });
   });
 
-  it('should not fallback to Growl notification if withFallback is false', function (done) {
+  it('should not fallback to Growl notification if withFallback is false', function (_context, done) {
     utils.isMountainLion = function () {
       return false;
     };
@@ -42,9 +44,9 @@ describe('Mac fallback', function () {
       return true;
     };
     const n = new NotificationCenter();
-    n.notify({ message: 'Hello World' }, function (err, response) {
-      expect(err).toBeTruthy();
-      expect(this).not.toBeInstanceOf(Growl);
+    n.notify({ message: 'Hello World' }, function (err) {
+      assert.ok(err);
+      assert.ok(!(this instanceof Growl));
       done();
     });
   });
@@ -82,7 +84,7 @@ describe('terminal-notifier', function () {
 
   describe('#notify()', function () {
     beforeEach(function () {
-      utils.fileCommandJson = asyncify(function (n, o, cb) {
+      utils.fileCommandJson = asyncify(function (_n, _o, cb) {
         cb(null, '');
       });
     });
@@ -91,24 +93,24 @@ describe('terminal-notifier', function () {
       utils.fileCommandJson = originalUtils;
     });
 
-    it('should notify with a message', function (done) {
-      notifier.notify({ message: 'Hello World' }, function (err, response) {
-        expect(err).toBeNull();
+    it('should notify with a message', function (_context, done) {
+      notifier.notify({ message: 'Hello World' }, function (err) {
+        assert.strictEqual(err, null);
         done();
       });
     });
 
-    it('should be chainable', function (done) {
+    it('should be chainable', function (_context, done) {
       notifier
         .notify({ message: 'First test' })
-        .notify({ message: 'Second test' }, function (err, response) {
-          expect(err).toBeNull();
+        .notify({ message: 'Second test' }, function (err) {
+          assert.strictEqual(err, null);
           done();
         });
     });
 
-    it('should be able to list all notifications', function (done) {
-      utils.fileCommandJson = asyncify(function (n, o, cb) {
+    it('should be able to list all notifications', function (_context, done) {
+      utils.fileCommandJson = asyncify(function (_n, _o, cb) {
         cb(
           null,
           fs
@@ -118,13 +120,13 @@ describe('terminal-notifier', function () {
       });
 
       notifier.notify({ list: 'ALL' }, function (_, response) {
-        expect(response).toBeTruthy();
+        assert.ok(response);
         done();
       });
     });
 
-    it('should be able to remove all messages', function (done) {
-      utils.fileCommandJson = asyncify(function (n, o, cb) {
+    it('should be able to remove all messages', function (_context, done) {
+      utils.fileCommandJson = asyncify(function (_n, _o, cb) {
         cb(
           null,
           fs
@@ -134,14 +136,14 @@ describe('terminal-notifier', function () {
       });
 
       notifier.notify({ remove: 'ALL' }, function (_, response) {
-        expect(response).toBeTruthy();
+        assert.ok(response);
 
-        utils.fileCommandJson = asyncify(function (n, o, cb) {
+        utils.fileCommandJson = asyncify(function (_n, _o, cb) {
           cb(null, '');
         });
 
         notifier.notify({ list: 'ALL' }, function (_, response) {
-          expect(response).toBeFalsy();
+          assert.ok(!response);
           done();
         });
       });
@@ -149,23 +151,28 @@ describe('terminal-notifier', function () {
   });
 
   describe('arguments', function () {
+    let original;
     beforeEach(function () {
-      this.original = utils.fileCommandJson;
+      original = utils.fileCommandJson;
     });
 
     afterEach(function () {
-      utils.fileCommandJson = this.original;
+      utils.fileCommandJson = original;
     });
 
     function expectArgsListToBe(expected, done) {
-      utils.fileCommandJson = asyncify(function (notifier, argsList, callback) {
-        expect(argsList).toEqual(expected);
+      utils.fileCommandJson = asyncify(function (
+        _notifier,
+        argsList,
+        callback
+      ) {
+        assert.deepStrictEqual(argsList, expected);
         callback();
         done();
       });
     }
 
-    it('should allow for non-sensical arguments (fail gracefully)', function (done) {
+    it('should allow for non-sensical arguments (fail gracefully)', function (_context, done) {
       const expected = [
         '-title',
         '"title"',
@@ -191,10 +198,20 @@ describe('terminal-notifier', function () {
       });
     });
 
-    it('should validate and transform sound to default sound if Windows sound is selected', function (done) {
-      utils.fileCommandJson = asyncify(function (notifier, argsList, callback) {
-        expect(testUtils.getOptionValue(argsList, '-title')).toBe('"Heya"');
-        expect(testUtils.getOptionValue(argsList, '-sound')).toBe('"Bottle"');
+    it('should validate and transform sound to default sound if Windows sound is selected', function (_context, done) {
+      utils.fileCommandJson = asyncify(function (
+        _notifier,
+        argsList,
+        callback
+      ) {
+        assert.strictEqual(
+          testUtils.getOptionValue(argsList, '-title'),
+          '"Heya"'
+        );
+        assert.strictEqual(
+          testUtils.getOptionValue(argsList, '-sound'),
+          '"Bottle"'
+        );
         callback();
         done();
       });
@@ -206,7 +223,7 @@ describe('terminal-notifier', function () {
       });
     });
 
-    it('should convert list of actions to flat list', function (done) {
+    it('should convert list of actions to flat list', function (_context, done) {
       const expected = [
         '-title',
         '"title \\"message\\""',
@@ -232,7 +249,7 @@ describe('terminal-notifier', function () {
       });
     });
 
-    it('should still support wait flag with default timeout', function (done) {
+    it('should still support wait flag with default timeout', function (_context, done) {
       const expected = [
         '-title',
         '"Title"',
@@ -252,7 +269,7 @@ describe('terminal-notifier', function () {
       notifier.notify({ title: 'Title', message: 'Message', wait: true });
     });
 
-    it('should let timeout set precedence over wait', function (done) {
+    it('should let timeout set precedence over wait', function (_context, done) {
       const expected = [
         '-title',
         '"Title"',
@@ -277,7 +294,7 @@ describe('terminal-notifier', function () {
       });
     });
 
-    it('should not set a default timeout if explicitly false', function (done) {
+    it('should not set a default timeout if explicitly false', function (_context, done) {
       const expected = [
         '-title',
         '"Title"',
@@ -299,7 +316,7 @@ describe('terminal-notifier', function () {
       });
     });
 
-    it('should escape all title and message', function (done) {
+    it('should escape all title and message', function (_context, done) {
       const expected = [
         '-title',
         '"title \\"message\\""',
