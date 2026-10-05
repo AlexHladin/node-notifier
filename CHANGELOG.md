@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0](https://github.com/AlexHladin/node-notifier/compare/node-notifier-v2-v1.0.0...node-notifier-v2-v1.0.0) (2026-10-05)
+## [1.0.1](https://github.com/AlexHladin/node-notifier/compare/node-notifier-v2-v1.0.0...node-notifier-v2-v1.0.1) (2026-10-05)
 
 
 ### Bug Fixes
