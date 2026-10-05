@@ -1,11 +1,21 @@
+const {
+  describe,
+  it,
+  beforeEach,
+  afterEach,
+  after,
+  mock
+} = require('node:test');
+const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
+mock.method(crypto, 'randomUUID', () => '123456789');
+after(() => mock.restoreAll());
+
 const Notify = require('../notifiers/toaster');
 const utils = require('../lib/utils');
 const path = require('path');
 const os = require('os');
 const testUtils = require('./_test-utils');
-jest.mock('crypto', () => {
-  return { randomUUID: () => '123456789' };
-});
 
 describe('WindowsToaster', function () {
   const original = utils.fileCommand;
@@ -32,24 +42,24 @@ describe('WindowsToaster', function () {
     os.release = originalRelease;
   });
 
-  it('should only pass allowed options and proper named properties', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-t')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-m')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-b')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-p')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-id')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-appID')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-pipeName')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-install')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-close')).toBeTruthy();
+  it('should only pass allowed options and proper named properties', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.ok(testUtils.argsListHas(argsList, '-t'));
+      assert.ok(testUtils.argsListHas(argsList, '-m'));
+      assert.ok(testUtils.argsListHas(argsList, '-b'));
+      assert.ok(testUtils.argsListHas(argsList, '-p'));
+      assert.ok(testUtils.argsListHas(argsList, '-id'));
+      assert.ok(testUtils.argsListHas(argsList, '-appID'));
+      assert.ok(testUtils.argsListHas(argsList, '-pipeName'));
+      assert.ok(testUtils.argsListHas(argsList, '-install'));
+      assert.ok(testUtils.argsListHas(argsList, '-close'));
 
-      expect(testUtils.argsListHas(argsList, '-foo')).toBeFalsy();
-      expect(testUtils.argsListHas(argsList, '-bar')).toBeFalsy();
-      expect(testUtils.argsListHas(argsList, '-message')).toBeFalsy();
-      expect(testUtils.argsListHas(argsList, '-title')).toBeFalsy();
-      expect(testUtils.argsListHas(argsList, '-tb')).toBeFalsy();
-      expect(testUtils.argsListHas(argsList, '-pid')).toBeFalsy();
+      assert.ok(!testUtils.argsListHas(argsList, '-foo'));
+      assert.ok(!testUtils.argsListHas(argsList, '-bar'));
+      assert.ok(!testUtils.argsListHas(argsList, '-message'));
+      assert.ok(!testUtils.argsListHas(argsList, '-title'));
+      assert.ok(!testUtils.argsListHas(argsList, '-tb'));
+      assert.ok(!testUtils.argsListHas(argsList, '-pid'));
       done();
     };
     const notifier = new Notify();
@@ -70,9 +80,12 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should pass silent without parameters', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.getOptionValue(argsList, '-silent')).not.toBe('true');
+  it('should pass silent without parameters', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.notStrictEqual(
+        testUtils.getOptionValue(argsList, '-silent'),
+        'true'
+      );
       done();
     };
     const notifier = new Notify();
@@ -84,9 +97,9 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should not have appId', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-appId')).toBeFalsy();
+  it('should not have appId', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.ok(!testUtils.argsListHas(argsList, '-appId'));
       done();
     };
     const notifier = new Notify();
@@ -97,9 +110,9 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should translate from notification centers appIcon', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-p')).toBeTruthy();
+  it('should translate from notification centers appIcon', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.ok(testUtils.argsListHas(argsList, '-p'));
       done();
     };
     const notifier = new Notify();
@@ -110,10 +123,10 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should translate from remove to close', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-close')).toBeTruthy();
-      expect(testUtils.argsListHas(argsList, '-remove')).toBeFalsy();
+  it('should translate from remove to close', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.ok(testUtils.argsListHas(argsList, '-close'));
+      assert.ok(!testUtils.argsListHas(argsList, '-remove'));
       done();
     };
     const notifier = new Notify();
@@ -121,58 +134,58 @@ describe('WindowsToaster', function () {
     notifier.notify({ message: 'Heya', remove: 3 });
   });
 
-  it('should fail if neither close or message is defined', function (done) {
+  it('should fail if neither close or message is defined', function (_context, done) {
     const notifier = new Notify();
 
     notifier.notify({ title: 'Heya' }, function (err) {
-      expect(err.message).toBe('Message or ID to close is required.');
+      assert.strictEqual(err.message, 'Message or ID to close is required.');
       done();
     });
   });
 
-  it('should pass only close', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-close')).toBeTruthy();
+  it('should pass only close', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList, callback) {
+      assert.ok(testUtils.argsListHas(argsList, '-close'));
       callback();
     };
     const notifier = new Notify();
 
     notifier.notify({ close: 3 }, function (err) {
-      expect(err).toBeFalsy();
+      assert.ok(!err);
       done();
     });
   });
 
-  it('should pass only message', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-m')).toBeTruthy();
+  it('should pass only message', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList, callback) {
+      assert.ok(testUtils.argsListHas(argsList, '-m'));
       callback();
     };
     const notifier = new Notify();
 
     notifier.notify({ message: 'Hello' }, function (err) {
-      expect(err).toBeFalsy();
+      assert.ok(!err);
       done();
     });
   });
 
-  it('should pass shorthand message', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-m')).toBeTruthy();
+  it('should pass shorthand message', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList, callback) {
+      assert.ok(testUtils.argsListHas(argsList, '-m'));
       callback();
     };
     const notifier = new Notify();
 
     notifier.notify('hello', function (err) {
-      expect(err).toBeFalsy();
+      assert.ok(!err);
       done();
     });
   });
 
-  it('should wrap message and title', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.getOptionValue(argsList, '-t')).toBe('Heya');
-      expect(testUtils.getOptionValue(argsList, '-m')).toBe('foo bar');
+  it('should wrap message and title', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(testUtils.getOptionValue(argsList, '-t'), 'Heya');
+      assert.strictEqual(testUtils.getOptionValue(argsList, '-m'), 'foo bar');
       done();
     };
     const notifier = new Notify();
@@ -180,10 +193,11 @@ describe('WindowsToaster', function () {
     notifier.notify({ title: 'Heya', message: 'foo bar' });
   });
 
-  it('should validate and transform sound to default sound if Mac sound is selected', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.getOptionValue(argsList, '-t')).toBe('Heya');
-      expect(testUtils.getOptionValue(argsList, '-s')).toBe(
+  it('should validate and transform sound to default sound if Mac sound is selected', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(testUtils.getOptionValue(argsList, '-t'), 'Heya');
+      assert.strictEqual(
+        testUtils.getOptionValue(argsList, '-s'),
         'Notification.Default'
       );
       done();
@@ -193,33 +207,34 @@ describe('WindowsToaster', function () {
     notifier.notify({ title: 'Heya', message: 'foo bar', sound: 'Frog' });
   });
 
-  it('should use 32 bit snoreToaster if 32 arch', function (done) {
+  it('should use 32 bit snoreToaster if 32 arch', function (_context, done) {
     os.arch = function () {
       return 'ia32';
     };
     const expected = 'snoretoast-x86.exe';
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(notifier).toEndWith(expected);
+    utils.fileCommand = function (notifier) {
+      assert.ok(notifier.endsWith(expected));
       done();
     };
     new Notify().notify({ title: 'title', message: 'body' });
   });
 
-  it('should default to x64 version', function (done) {
+  it('should default to x64 version', function (_context, done) {
     os.arch = function () {
       return 'x64';
     };
     const expected = 'snoretoast-x64.exe';
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(notifier).toEndWith(expected);
+    utils.fileCommand = function (notifier) {
+      assert.ok(notifier.endsWith(expected));
       done();
     };
     new Notify().notify({ title: 'title', message: 'body' });
   });
 
-  it('sound as true should select default value', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.getOptionValue(argsList, '-s')).toBe(
+  it('sound as true should select default value', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(
+        testUtils.getOptionValue(argsList, '-s'),
         'Notification.Default'
       );
       done();
@@ -229,9 +244,9 @@ describe('WindowsToaster', function () {
     notifier.notify({ message: 'foo bar', sound: true });
   });
 
-  it('sound as false should be same as silent', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.argsListHas(argsList, '-silent')).toBeTruthy();
+  it('sound as false should be same as silent', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.ok(testUtils.argsListHas(argsList, '-silent'));
       done();
     };
     const notifier = new Notify();
@@ -239,9 +254,12 @@ describe('WindowsToaster', function () {
     notifier.notify({ message: 'foo bar', sound: false });
   });
 
-  it('should override sound', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(testUtils.getOptionValue(argsList, '-s')).toBe('Notification.IM');
+  it('should override sound', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(
+        testUtils.getOptionValue(argsList, '-s'),
+        'Notification.IM'
+      );
       done();
     };
     const notifier = new Notify();
@@ -253,9 +271,12 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should parse file protocol URL of icon', function (done) {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(argsList[3]).toBe('C:\\node-notifier\\test\\fixture\\coulson.jpg');
+  it('should parse file protocol URL of icon', function (_context, done) {
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(
+        argsList[3],
+        'C:\\node-notifier\\test\\fixture\\coulson.jpg'
+      );
       done();
     };
 
@@ -268,10 +289,10 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should not parse local path of icon', function (done) {
+  it('should not parse local path of icon', function (_context, done) {
     const icon = path.join(__dirname, 'fixture', 'coulson.jpg');
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(argsList[3]).toBe(icon);
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(argsList[3], icon);
       done();
     };
 
@@ -279,10 +300,10 @@ describe('WindowsToaster', function () {
     notifier.notify({ title: 'Heya', message: 'foo bar', icon: icon });
   });
 
-  it('should not parse normal URL of icon', function (done) {
+  it('should not parse normal URL of icon', function (_context, done) {
     const icon = 'http://csscomb.com/img/csscomb.jpg';
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(argsList[3]).toBe(icon);
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.strictEqual(argsList[3], icon);
       done();
     };
 
@@ -291,8 +312,8 @@ describe('WindowsToaster', function () {
   });
 
   it('should build command-line argument for actions array properly', () => {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(argsList).toEqual([
+    utils.fileCommand = function (_notifier, argsList) {
+      assert.deepStrictEqual(argsList, [
         '-close',
         '123',
         '-install',
@@ -330,9 +351,9 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should call custom notifier when customPath is passed via message', (done) => {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(notifier).toEqual('/test/customPath/snoretoast-x64.exe');
+  it('should call custom notifier when customPath is passed via message', (_context, done) => {
+    utils.fileCommand = function (notifier) {
+      assert.deepStrictEqual(notifier, '/test/customPath/snoretoast-x64.exe');
       done();
     };
 
@@ -352,9 +373,9 @@ describe('WindowsToaster', function () {
     });
   });
 
-  it('should call custom notifier when customPath is passed via constructor', (done) => {
-    utils.fileCommand = function (notifier, argsList, callback) {
-      expect(notifier).toEqual('/test/customPath/snoretoast-x64.exe');
+  it('should call custom notifier when customPath is passed via constructor', (_context, done) => {
+    utils.fileCommand = function (notifier) {
+      assert.deepStrictEqual(notifier, '/test/customPath/snoretoast-x64.exe');
       done();
     };
 

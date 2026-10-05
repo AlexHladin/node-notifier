@@ -1,8 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "env": {
-    "node": true,
-    "jest": true
+    "node": true
   },
   "rules": {
     "no-control-regex": "off",
