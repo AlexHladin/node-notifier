@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/AlexHladin/node-notifier/compare/node-notifier-v2-v1.0.1...node-notifier-v2-v1.0.2) (2026-11-01)
+
+
+### Bug Fixes
+
+* vulnerable dependencies ([#22](https://github.com/AlexHladin/node-notifier/issues/22)) ([04b2e6a](https://github.com/AlexHladin/node-notifier/commit/04b2e6a024d376d046822bd39fc5303583b196ee))
+
 ## [1.0.1](https://github.com/AlexHladin/node-notifier/compare/node-notifier-v2-v1.0.0...node-notifier-v2-v1.0.1) (2026-10-05)
 
 
